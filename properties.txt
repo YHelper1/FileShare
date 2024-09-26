@@ -1,0 +1,2 @@
+server: 1000
+socket: 2647
