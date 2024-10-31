@@ -1,2 +1,2 @@
-server: 1000
-socket: 2647
+ip: 2
+port: 
