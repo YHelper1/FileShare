@@ -1,2 +1,2 @@
-ip: 2
-port: 
+ip: localhost
+port: 80

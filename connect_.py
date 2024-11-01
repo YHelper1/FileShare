@@ -8,5 +8,5 @@ class connect_:
         self.sock.connect((server, int(sockt)))
 
     def sendfile(self, byts):
-        self.sock.send(byts)
+        self.sock.sendall(byts)
 
