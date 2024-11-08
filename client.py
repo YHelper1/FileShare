@@ -5,7 +5,6 @@ import search_ui
 import PyQt6, time
 from PyQt6.QtCore import Qt
 
-
 def read_props():
     try:
         f = open("properties.txt", "r")
@@ -166,8 +165,9 @@ class get_file(PyQt6.QtWidgets.QMainWindow,search_ui.Ui_MainWindow):
         self.connection = socket.socket()
         self.connection.connect((ip, int(port)))
         info = "%SEARCH%<" + self.search_line.text().replace(" ", "")
-        if len(str.encode(info)) < 4096:
-            info += (" " * (4096 - len(str.encode(info))))
+        self.passcode = self.search_line.text().replace(" ", "")
+        if len(str.encode(info)) < 4087:
+            info += (" " * (4087 - len(str.encode(info))))
             self.connection.sendall(str.encode(info))
         else:
             self.connection.sendall(str.encode(info))
@@ -184,15 +184,15 @@ class get_file(PyQt6.QtWidgets.QMainWindow,search_ui.Ui_MainWindow):
             options=PyQt6.QtWidgets.QFileDialog.Option.DontUseNativeDialog,
         )
         print(f"{dir_path}/{self.filename}")
-        info = "%download%<" + self.filename
+        info = "%download%<" + self.passcode
         if len(str.encode(info)) < 4096:
             info += (" " * (4096 - len(str.encode(info))))
             self.connection.sendall(str.encode(info))
         else:
             self.connection.send(info.encode())
         BUFFER_SIZE = 4096
-        elem1 = os.path.basename(f"{dir_path}/{self.filename}")
-        with open(elem1, "wb") as f:
+
+        with pathlib.Path(dir_path + "/" + self.filename).open("wb") as f:
             while True:
 
                 bytes_read = self.connection.recv(BUFFER_SIZE)

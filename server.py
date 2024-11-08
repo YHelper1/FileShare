@@ -25,7 +25,9 @@ def recvall(sock, address):
         if not os.path.exists(f"{work_dir}/{address[0]}"):
             os.makedirs(f"{work_dir}/{address[0]}")
 
-        elem1 = os.path.basename(f"{work_dir}/{address[0]}/{elem1}")
+        elem1 = os.path.basename(elem1)
+        elem1 = f'{work_dir}/{address[0]}/{elem1}'
+        print(elem1)
         with open(elem1, "wb") as f:
             while True:
                 bytes_read = client_socket.recv(BUFFER_SIZE)
@@ -39,10 +41,9 @@ def recvall(sock, address):
 def return_passcode(sock: socket.socket, folder, name):
     while True:
         uid = str(uuid.uuid4())[:8]
-        print(uid)
         result = cur.execute(f"select path from path_n_uid where uid = '{uid}'").fetchone()
         if not result:
-            cur.execute(f"INSERT INTO path_n_uid (uid, path) VALUES ('{uid}', '{folder + '/' + name}')")
+            cur.execute(f"INSERT INTO path_n_uid (uid, path) VALUES ('{uid}', '{name}')")
             con.commit()
             break
     sock.sendall(uid.encode())
@@ -58,10 +59,11 @@ def send_info(passcode, sock: socket.socket):
         filename = file[file.rfind("/") + 1:]
         sock.sendall(str.encode(filename) + str.encode((" " * (4096 - len(str.encode(filename))))))
 
-def send_f(connection: socket.socket, file):
+def send_f(connection: socket.socket, passcode):
     BUFFER_SIZE = 4096
-    with open(file, "rb") as f:
-        print(file)
+    result = cur.execute(f"select path from path_n_uid where uid = '{passcode}'").fetchone()
+    with open(result[0], "rb") as f:
+        print(result[0])
         while True:
             bytes_read = f.read(BUFFER_SIZE)
             if not bytes_read:
