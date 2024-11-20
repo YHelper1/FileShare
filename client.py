@@ -1,10 +1,20 @@
-import socket, start_client, PyQt6.QtWidgets, sys, PyQt6.QtGui, progress_client, PyQt6.QtCore
-import pathlib, os
-import threading
-import search_ui
-import PyQt6, time
-from PyQt6.QtCore import Qt
+import PyQt6.QtCore
+import PyQt6.QtGui
+import PyQt6.QtWidgets
 import datetime
+import os
+import pathlib
+import progress_client
+import socket
+import start_client
+import sys
+
+import PyQt6
+from PyQt6.QtCore import Qt
+
+import search_ui
+
+
 def read_props():
     try:
         f = open("properties.txt", "r")
@@ -18,17 +28,19 @@ def read_props():
         f.write("ip: localhost\nport: 80")
         return ["localhost", 80]
 
+
 def read_history():
     try:
         f = open("history.txt", "r")
         mas = []
         for i in f.readlines():
-            mas.append(i[i.find(" ") + 1:].rstrip('\n'))
+            mas.append(i.rstrip('\n'))
         f.close()
         return mas
     except FileNotFoundError:
         f = open("history.txt", "w")
         f.close()
+
 
 class settings_window(PyQt6.QtWidgets.QMainWindow):
     def __init__(self):
@@ -102,25 +114,56 @@ class start_window(PyQt6.QtWidgets.QMainWindow, start_client.Ui_MainWindow):
         self.hwind.show()
 
     def upload(self):
-        self.uploadwind = load_file()
-        self.uploadwind.show()
+        try:
+            self.uploadwind = load_file()
+            self.uploadwind.show()
+        except ConnectionRefusedError:
+            self.statusBar().setStyleSheet("color: red")
+            self.statusBar().showMessage("Такого сервера не существует или он отключён", 2500)
+        except ConnectionResetError:
+            self.statusBar().setStyleSheet("color: red")
+            self.statusBar().showMessage("Сервер разорвал подключение", 2500)
 
     def get(self):
-        self.getfilewind = get_file()
-        self.getfilewind.show()
+        try:
+            self.getfilewind = get_file()
+            self.getfilewind.show()
+        except ConnectionRefusedError:
+            self.statusBar().setStyleSheet("color: red")
+            self.statusBar().showMessage("Такого сервера не существует или он отключён", 2500)
+        except ConnectionResetError:
+            self.statusBar().setStyleSheet("color: red")
+            self.statusBar().showMessage("Сервер разорвал подключение", 2500)
+
 
 class history(PyQt6.QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("История")
         self.setFixedSize(500, 500)
+        self.label = PyQt6.QtWidgets.QLabel(self)
+        self.label.setText("История")
+        self.label.move(25, 20)
+        font = PyQt6.QtGui.QFont()
+        font.setPointSize(20)
+        self.label.setFont(font)
+        self.label.setFixedSize(self.label.size().width() + 15, self.label.size().height())
+        self.delt = PyQt6.QtWidgets.QPushButton("Очистить", self)
+        self.delt.move(350, 20)
         self.qlist = PyQt6.QtWidgets.QListWidget(self)
         self.qlist.move(25, 100)
         self.qlist.setFixedSize(450, 380)
         self.read_h()
+        self.delt.clicked.connect(self.delete)
+
     def read_h(self):
         for i in read_history():
             self.qlist.addItem(i)
+
+    def delete(self):
+        self.qlist.clear()
+        open('history.txt', "w").write('')
+
 
 class load_file(PyQt6.QtWidgets.QMainWindow, progress_client.Ui_MainWindow):
     def __init__(self):
@@ -136,7 +179,7 @@ class load_file(PyQt6.QtWidgets.QMainWindow, progress_client.Ui_MainWindow):
         self.pass_lbl = PyQt6.QtWidgets.QLabel(self)
         self.pass_lbl.move(120, 55)
         self.pass_lbl.hide()
-        threading.Thread(self.send_f()).run()
+        self.send_f()
 
     def send_f(self):
         SEPARATOR = "<"
@@ -162,27 +205,30 @@ class load_file(PyQt6.QtWidgets.QMainWindow, progress_client.Ui_MainWindow):
             while True:
                 PyQt6.QtWidgets.QApplication.processEvents()
                 bytes_read = f.read(BUFFER_SIZE)
-                print(len(bytes_read))
                 if not bytes_read:
-                    print(bytes_read)
                     break
                 connection.sendall(bytes_read)
                 now += step
                 if now > 1:
                     self.progressBar.setValue(self.progressBar.value() + int(now))
                     now -= int(now)
-
+        self.progressBar.setValue(100)
         passcode = connection.recv(8).decode()
         self.Status_lbl.setText("Файл загружен")
         self.pass_lbl.setFixedSize(200, 30)
         self.pass_lbl.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
         self.pass_lbl.setText(f"Код файла: {passcode}")
         self.pass_lbl.show()
-        open("history.txt", "a").write((self.file[self.file.rfind('/') + 1:] + " " + str(round(filesize / 1024, 1)) + " Mb " + str(datetime.datetime.now())[:10] + '\n'))
+        open("history.txt", "a").write((self.file[self.file.rfind('/') + 1:] + " " + str(
+            round(filesize / 1024, 1)) + " Mb " + str(datetime.datetime.now())[:10] + '\n'))
         self.Done_button.show()
         connection.close()
 
-class get_file(PyQt6.QtWidgets.QMainWindow,search_ui.Ui_MainWindow):
+    def closeEvent(self, a0):
+        pass
+
+
+class get_file(PyQt6.QtWidgets.QMainWindow, search_ui.Ui_MainWindow):
     def __init__(self):
         super().__init__()
         super().setupUi(self)
@@ -222,7 +268,6 @@ class get_file(PyQt6.QtWidgets.QMainWindow,search_ui.Ui_MainWindow):
         self.progressBar.setValue(0)
         PyQt6.QtWidgets.QApplication.processEvents()
         dir_path = PyQt6.QtWidgets.QFileDialog.getExistingDirectory(self)
-        print(f"{dir_path}/{self.filename}")
         info = "%download%<" + self.passcode
         ip = read_props()[0]
         port = read_props()[1]
@@ -240,14 +285,14 @@ class get_file(PyQt6.QtWidgets.QMainWindow,search_ui.Ui_MainWindow):
             while True:
 
                 bytes_read = connection.recv(BUFFER_SIZE)
-                if not bytes_read:
+                if len(bytes_read) < BUFFER_SIZE:
+                    f.write(bytes_read)
                     break
                 f.write(bytes_read)
                 now += step
                 if now > 1:
                     self.progressBar.setValue(self.progressBar.value() + int(now))
                     now -= int(now)
-                print(1)
 
 
 def except_hook(cls, exception, traceback):
