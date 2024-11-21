@@ -222,8 +222,9 @@ class load_file(PyQt6.QtWidgets.QMainWindow, progress_client.Ui_MainWindow):
         self.pass_lbl.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
         self.pass_lbl.setText(f"Код файла: {passcode}")
         self.pass_lbl.show()
+        size_form = filesize / (1024 ** 2)
         open("history.txt", "a").write((self.file[self.file.rfind('/') + 1:] + " " + str(
-            round(filesize / 1024, 1)) + " Mb " + str(datetime.datetime.now())[:10] + '\n'))
+            round(size_form, 1)) + " Mb " + str(datetime.datetime.now())[:10] + " " + passcode + ' \n'))
         self.Done_button.show()
         connection.close()
 

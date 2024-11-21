@@ -103,7 +103,7 @@ def recvall(sock, address):
 
 
 def return_passcode(sock: socket.socket, folder, name):
-    con = sqlite3.connect("../files.sqlite")
+    con = sqlite3.connect((os.getcwd() + "/files.sqlite"))
     cur = con.cursor()
     while True:
         uid = str(uuid.uuid4())[:8]
@@ -116,7 +116,7 @@ def return_passcode(sock: socket.socket, folder, name):
 
 
 def send_info(passcode, sock: socket.socket):
-    con = sqlite3.connect("../files.sqlite")
+    con = sqlite3.connect((os.getcwd() + "/files.sqlite"))
     cur = con.cursor()
     result = cur.execute(f"select path from path_n_uid where uid = '{passcode}'").fetchone()
     if not result:
@@ -129,7 +129,7 @@ def send_info(passcode, sock: socket.socket):
 
 
 def send_f(connection: socket.socket, passcode):
-    con = sqlite3.connect("../files.sqlite")
+    con = sqlite3.connect((os.getcwd() + "/files.sqlite"))
     cur = con.cursor()
     BUFFER_SIZE = 4096
     result = cur.execute(f"select path from path_n_uid where uid = '{passcode}'").fetchone()
