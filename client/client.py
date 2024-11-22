@@ -297,6 +297,7 @@ class get_file(PyQt6.QtWidgets.QMainWindow, search_ui.Ui_MainWindow):
                 if now > 1:
                     self.progressBar.setValue(self.progressBar.value() + int(now))
                     now -= int(now)
+        self.progressBar.setValue(100)
 
 
 def except_hook(cls, exception, traceback):

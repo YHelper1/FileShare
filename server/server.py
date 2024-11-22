@@ -96,7 +96,7 @@ def recvall(sock, address):
                         now -= round(now, 0)
             progress.update(100)
             progress.set_description_str((colorama.Style.DIM + ("Получено " + info_pb)))
-            return_passcode(sock, address[0], elem1[elem1.rfind("/") + 1:])
+            return_passcode(sock, address[0], elem1)
         sock.close()
     except ConnectionResetError:
         print(f"Пользователь {str(address[0]) + ":" + str(address[1])} разорвал подключение")
@@ -117,6 +117,7 @@ def return_passcode(sock: socket.socket, folder, name):
 
 def send_info(passcode, sock: socket.socket):
     con = sqlite3.connect((os.getcwd() + "/files.sqlite"))
+    print((os.getcwd() + "/files.sqlite"))
     cur = con.cursor()
     result = cur.execute(f"select path from path_n_uid where uid = '{passcode}'").fetchone()
     if not result:
@@ -124,7 +125,7 @@ def send_info(passcode, sock: socket.socket):
     else:
         file = str(result[0])
         filename = file[file.rfind("/") + 1:] + "<"
-        size = os.path.getsize(file[file.rfind("/") + 1:])
+        size = os.path.getsize(file)
         sock.sendall(str.encode(filename + str(size) + (" " * (4096 - len(str.encode(filename + str(size)))))))
 
 
