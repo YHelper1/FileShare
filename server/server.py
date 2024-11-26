@@ -117,7 +117,6 @@ def return_passcode(sock: socket.socket, folder, name):
 
 def send_info(passcode, sock: socket.socket):
     con = sqlite3.connect((os.getcwd() + "/files.sqlite"))
-    print((os.getcwd() + "/files.sqlite"))
     cur = con.cursor()
     result = cur.execute(f"select path from path_n_uid where uid = '{passcode}'").fetchone()
     if not result:
