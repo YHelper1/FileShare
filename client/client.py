@@ -25,7 +25,7 @@ def read_props():
         return mas
     except FileNotFoundError:
         f = open("properties.txt", "w")
-        f.write("ip: localhost\nport: 80")
+        f.write(f"ip: {socket.gethostbyname(socket.gethostname())}\nport: 80")
         return ["localhost", 80]
 
 
@@ -289,8 +289,7 @@ class get_file(PyQt6.QtWidgets.QMainWindow, search_ui.Ui_MainWindow):
             while True:
 
                 bytes_read = connection.recv(BUFFER_SIZE)
-                if len(bytes_read) < BUFFER_SIZE:
-                    f.write(bytes_read)
+                if not bytes_read:
                     break
                 f.write(bytes_read)
                 now += step

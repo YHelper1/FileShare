@@ -13,6 +13,13 @@ def write_props(port):
     f = open("../server_props.txt", "w")
     f.write("port: " + port)
 
+def create_database():
+    file = open("files.sqlite", "w")
+    file.close()
+    con = sqlite3.connect((os.getcwd() + "/files.sqlite"))
+    cur = con.cursor()
+    cur.execute("CREATE TABLE path_n_uid (uid  TEXT, path TEXT);")
+    con.commit()
 
 def read_props():
     try:
@@ -27,7 +34,7 @@ serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 
 def con_reload():
-    serversocket.bind(('localhost', int(read_props())))
+    serversocket.bind((socket.gethostbyname(socket.gethostname()), int(read_props())))
     serversocket.listen(20)
 
 
@@ -45,6 +52,7 @@ def thr_inp():
                 serversocket.close()
                 serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 con_reload()
+                print("Порт успешно сменён на", inp[inp.find(" ") + 1:])
         except UnicodeDecodeError:
             pass
 
@@ -74,7 +82,7 @@ def recvall(sock, address):
 
             elem1 = os.path.basename(elem1)
             info_pb = F"{elem1} от {str(address[0]) + ":" + str(address[1])}"
-            progress = tqdm.tqdm(range(100), desc=(colorama.Style.DIM + ("Получение " + info_pb)), bar_format=f_b,
+            progress = tqdm.tqdm(range(100), desc=(colorama.Style.DIM + ("Получение файла " + info_pb)), bar_format=f_b,
                                  colour="white")
             work_dir = os.getcwd()
             now = 0
@@ -95,14 +103,18 @@ def recvall(sock, address):
                         progress.update(round(now, 0))
                         now -= round(now, 0)
             progress.update(100)
-            progress.set_description_str((colorama.Style.DIM + ("Получено " + info_pb)))
+            progress.set_description_str((colorama.Style.DIM + ("Получен файл " + info_pb)))
             return_passcode(sock, address[0], elem1)
         sock.close()
-    except ConnectionResetError:
+    except ConnectionResetError as e:
         print(f"Пользователь {str(address[0]) + ":" + str(address[1])} разорвал подключение")
 
 
 def return_passcode(sock: socket.socket, folder, name):
+    try:
+        open("files.sqlite", "r")
+    except FileNotFoundError:
+        create_database()
     con = sqlite3.connect((os.getcwd() + "/files.sqlite"))
     cur = con.cursor()
     while True:
@@ -116,8 +128,11 @@ def return_passcode(sock: socket.socket, folder, name):
 
 
 def send_info(passcode, sock: socket.socket):
+    try:
+        open("files.sqlite", "r")
+    except FileNotFoundError:
+        create_database()
     con = sqlite3.connect((os.getcwd() + "/files.sqlite"))
-    print((os.getcwd() + "/files.sqlite"))
     cur = con.cursor()
     result = cur.execute(f"select path from path_n_uid where uid = '{passcode}'").fetchone()
     if not result:
@@ -127,20 +142,36 @@ def send_info(passcode, sock: socket.socket):
         filename = file[file.rfind("/") + 1:] + "<"
         size = os.path.getsize(file)
         sock.sendall(str.encode(filename + str(size) + (" " * (4096 - len(str.encode(filename + str(size)))))))
+        print(f"Информация о файле {file[file.rfind("/") + 1:]} отправлена на {sock.getpeername()[0]}:{sock.getpeername()[1]}")
 
 
 def send_f(connection: socket.socket, passcode):
+    try:
+        open("files.sqlite", "r")
+    except FileNotFoundError:
+        create_database()
     con = sqlite3.connect((os.getcwd() + "/files.sqlite"))
     cur = con.cursor()
     BUFFER_SIZE = 4096
     result = cur.execute(f"select path from path_n_uid where uid = '{passcode}'").fetchone()
+    info_pb = F"файла {result[0][result[0].rfind("/") + 1:]} на {connection.getpeername()[0]}:{connection.getpeername()[1]}"
+    f_b = read_bar_format = "{l_bar}{bar}"
+    progress = tqdm.tqdm(range(100), desc=(colorama.Style.DIM + ("Отправка " + info_pb)), bar_format=f_b,
+                         colour="white")
+    step = (100 / int(os.path.getsize(result[0]))) * BUFFER_SIZE
+    now = 0
     with open(result[0], "rb") as f:
         while True:
             bytes_read = f.read(BUFFER_SIZE)
             if not bytes_read:
                 break
             connection.sendall(bytes_read)
-
+            now += 1
+            if (now > 1):
+                progress.update(round(now, 0))
+                now -= round(now, 0)
+    progress.update(100)
+    progress.set_description_str((colorama.Style.DIM + F"Файл {result[0][result[0].rfind("/") + 1:]} отправлен на {connection.getpeername()[0]}:{connection.getpeername()[1]}"))
 
 t1 = threading.Thread(target=main_recieve)
 t2 = threading.Thread(target=thr_inp)
