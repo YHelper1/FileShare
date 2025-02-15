@@ -116,7 +116,6 @@ class start_window(PyQt6.QtWidgets.QMainWindow, start_client.Ui_MainWindow):
     def upload(self):
         try:
             self.uploadwind = load_file()
-            self.uploadwind.show()
         except ConnectionRefusedError:
             self.statusBar().setStyleSheet("color: red")
             self.statusBar().showMessage("Такого сервера не существует или он отключён", 2500)
@@ -188,6 +187,8 @@ class load_file(PyQt6.QtWidgets.QMainWindow, progress_client.Ui_MainWindow):
         SEPARATOR = "<"
         BUFFER_SIZE = 4096
         self.file = PyQt6.QtWidgets.QFileDialog.getOpenFileName(self)[0]
+        if os.path.basename(self.file) == "":
+            return
         self.show()
         PyQt6.QtWidgets.QApplication.processEvents()
         filesize = os.path.getsize(self.file)
@@ -262,16 +263,23 @@ class get_file(PyQt6.QtWidgets.QMainWindow, search_ui.Ui_MainWindow):
             self.connection.sendall(str.encode(info))
         else:
             self.connection.sendall(str.encode(info))
-        self.filename, self.filesize = self.connection.recv(4096).decode().split(SEPARATOR)
-        self.file_name.setText(self.filename)
-        self.size_of_file.setText(str(round(eval(self.filesize + "/1048576"), 1)) + "Mb")
-        self.download_btn.show()
+        try:
+            self.filename, self.filesize = self.connection.recv(4096).decode().split(SEPARATOR)
+            self.file_name.setText(self.filename)
+            self.size_of_file.setText(str(round(eval(self.filesize + "/1048576"), 1)) + "Mb")
+            self.download_btn.show()
+        except ValueError:
+            self.file_name.setText("Файл не найден")
+            self.download_btn.hide()
+            self.size_of_file.setText("")
 
     def download(self):
+        dir_path = PyQt6.QtWidgets.QFileDialog.getExistingDirectory(self)
+        if dir_path == "":
+            return
         self.progressBar.show()
         self.progressBar.setValue(0)
         PyQt6.QtWidgets.QApplication.processEvents()
-        dir_path = PyQt6.QtWidgets.QFileDialog.getExistingDirectory(self)
         info = "%download%<" + self.passcode
         ip = read_props()[0]
         port = read_props()[1]

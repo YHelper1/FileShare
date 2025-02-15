@@ -1,6 +1,7 @@
 import os
 import socket
 import sqlite3
+import sys
 import threading
 import uuid
 from threading import Thread
@@ -173,6 +174,9 @@ def send_f(connection: socket.socket, passcode):
     progress.update(100)
     progress.set_description_str((colorama.Style.DIM + F"Файл {result[0][result[0].rfind("/") + 1:]} отправлен на {connection.getpeername()[0]}:{connection.getpeername()[1]}"))
 
+def except_hook(cls, exception, traceback):
+    sys.__excepthook__(cls, exception, traceback)
+sys.excepthook = except_hook
 t1 = threading.Thread(target=main_recieve)
 t2 = threading.Thread(target=thr_inp)
 
