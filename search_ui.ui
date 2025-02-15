@@ -40,8 +40,8 @@
    <widget class="QPushButton" name="download_btn">
     <property name="geometry">
      <rect>
-      <x>330</x>
-      <y>110</y>
+      <x>470</x>
+      <y>100</y>
       <width>81</width>
       <height>41</height>
      </rect>
@@ -55,7 +55,7 @@
      <rect>
       <x>20</x>
       <y>110</y>
-      <width>291</width>
+      <width>431</width>
       <height>41</height>
      </rect>
     </property>
@@ -70,7 +70,7 @@
      <x>0</x>
      <y>0</y>
      <width>586</width>
-     <height>26</height>
+     <height>33</height>
     </rect>
    </property>
   </widget>

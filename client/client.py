@@ -1,3 +1,6 @@
+import threading
+import time
+
 import PyQt6.QtCore
 import PyQt6.QtGui
 import PyQt6.QtWidgets
@@ -246,10 +249,12 @@ class get_file(PyQt6.QtWidgets.QMainWindow, search_ui.Ui_MainWindow):
         self.size_of_file = PyQt6.QtWidgets.QLabel(self)
         self.size_of_file.move(20, 150)
         self.search_btn.clicked.connect(self.search)
+        self.download_btn.setText("")
         self.download_btn.setIcon(PyQt6.QtGui.QIcon("download.png"))
         self.download_btn.clicked.connect(self.download)
 
     def search(self):
+        self.progressBar.hide()
         SEPARATOR = "<"
         BUFFER_SIZE = 4096
         ip = read_props()[0]
@@ -295,7 +300,6 @@ class get_file(PyQt6.QtWidgets.QMainWindow, search_ui.Ui_MainWindow):
         BUFFER_SIZE = 4096
         with open(f"{dir_path}/{self.filename}", "wb") as f:
             while True:
-
                 bytes_read = connection.recv(BUFFER_SIZE)
                 if not bytes_read:
                     break
@@ -305,6 +309,11 @@ class get_file(PyQt6.QtWidgets.QMainWindow, search_ui.Ui_MainWindow):
                     self.progressBar.setValue(self.progressBar.value() + int(now))
                     now -= int(now)
         self.progressBar.setValue(100)
+        threading.Thread(target=self.progress_bar_close).start()
+
+    def progress_bar_close(self):
+        time.sleep(2)
+        self.progressBar.hide()
 
 
 def except_hook(cls, exception, traceback):
