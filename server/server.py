@@ -35,7 +35,7 @@ serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 
 def con_reload():
-    serversocket.bind((socket.gethostbyname(socket.gethostname()), int(read_props())))
+    serversocket.bind(('0.0.0.0', int(read_props())))
     serversocket.listen(20)
 
 
