@@ -72,6 +72,7 @@ def recvall(sock, address):
     BUFFER_SIZE = 4096
     SEPARATOR = "<"
     received = sock.recv(BUFFER_SIZE).decode()
+    print(received)
     elem1, elem2 = received.split(SEPARATOR)
     try:
         if elem1 == "%SEARCH%":
