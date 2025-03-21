@@ -73,43 +73,46 @@ def recvall(sock, address):
     SEPARATOR = "<"
     received = sock.recv(BUFFER_SIZE).decode()
     print(received)
-    elem1, elem2 = received.split(SEPARATOR)
-    try:
-        if elem1 == "%SEARCH%":
-            send_info(elem2.replace(" ", ""), sock)
-        elif elem1 == "%download%":
-            send_f(sock, elem2.replace(" ", ""))
-        else:
-            f_b = read_bar_format = "{l_bar}{bar}"
+    if received != '':
+        elem1, elem2 = received.split(SEPARATOR)
+        try:
+            if elem1 == "%SEARCH%":
+                send_info(elem2.replace(" ", ""), sock)
+            elif elem1 == "%download%":
+                send_f(sock, elem2.replace(" ", ""))
+            else:
+                f_b = read_bar_format = "{l_bar}{bar}"
 
-            elem1 = os.path.basename(elem1)
-            info_pb = F"{elem1} от {str(address[0]) + ":" + str(address[1])}"
-            progress = tqdm.tqdm(range(100), desc=(colorama.Style.DIM + ("Получение файла " + info_pb)), bar_format=f_b,
-                                 colour="white")
-            work_dir = os.getcwd()
-            now = 0
-            step = (100 / int(elem2)) * BUFFER_SIZE
-            if not os.path.exists(f"{work_dir}/{address[0]}"):
-                os.makedirs(f"{work_dir}/{address[0]}")
+                elem1 = os.path.basename(elem1)
+                info_pb = F"{elem1} от {str(address[0]) + ":" + str(address[1])}"
+                progress = tqdm.tqdm(range(100), desc=(colorama.Style.DIM + ("Получение файла " + info_pb)),
+                                     bar_format=f_b,
+                                     colour="white")
+                work_dir = os.getcwd()
+                now = 0
+                step = (100 / int(elem2)) * BUFFER_SIZE
+                if not os.path.exists(f"{work_dir}/{address[0]}"):
+                    os.makedirs(f"{work_dir}/{address[0]}")
 
-            elem1 = f'{work_dir}/{address[0]}/{elem1}'
-            with open(elem1, "wb") as f:
-                while True:
-                    bytes_read = sock.recv(BUFFER_SIZE)
-                    if len(bytes_read) < BUFFER_SIZE:
+                elem1 = f'{work_dir}/{address[0]}/{elem1}'
+                with open(elem1, "wb") as f:
+                    while True:
+                        bytes_read = sock.recv(BUFFER_SIZE)
+                        if len(bytes_read) < BUFFER_SIZE:
+                            f.write(bytes_read)
+                            break
                         f.write(bytes_read)
-                        break
-                    f.write(bytes_read)
-                    now += step
-                    if (now > 1):
-                        progress.update(round(now, 0))
-                        now -= round(now, 0)
-            progress.update(100)
-            progress.set_description_str((colorama.Style.DIM + ("Получен файл " + info_pb)))
-            return_passcode(sock, address[0], elem1)
-        sock.close()
-    except ConnectionResetError as e:
-        print(f"Пользователь {str(address[0]) + ":" + str(address[1])} разорвал подключение")
+                        now += step
+                        if (now > 1):
+                            progress.update(round(now, 0))
+                            now -= round(now, 0)
+                progress.update(100)
+                progress.set_description_str((colorama.Style.DIM + ("Получен файл " + info_pb)))
+                return_passcode(sock, address[0], elem1)
+            sock.close()
+        except ConnectionResetError as e:
+            print(f"Пользователь {str(address[0]) + ":" + str(address[1])} разорвал подключение")
+
 
 
 def return_passcode(sock: socket.socket, folder, name):
