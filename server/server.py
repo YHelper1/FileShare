@@ -72,7 +72,6 @@ def recvall(sock, address):
     BUFFER_SIZE = 4096
     SEPARATOR = "<"
     received = sock.recv(BUFFER_SIZE).decode()
-    print(received)
     if received != '':
         elem1, elem2 = received.split(SEPARATOR)
         try:

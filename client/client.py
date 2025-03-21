@@ -246,6 +246,7 @@ class get_file(PyQt6.QtWidgets.QMainWindow, search_ui.Ui_MainWindow):
         self.progressBar.setGeometry(PyQt6.QtCore.QRect(20, 200, 481, 31))
         self.progressBar.setValue(0)
         self.progressBar.hide()
+        self.setWindowTitle("Получение файла")
         self.size_of_file = PyQt6.QtWidgets.QLabel(self)
         self.size_of_file.move(20, 150)
         self.search_btn.clicked.connect(self.search)
