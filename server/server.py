@@ -5,7 +5,7 @@ import sys
 import threading
 import uuid
 from threading import Thread
-
+import time
 import colorama
 import tqdm
 
@@ -109,6 +109,7 @@ def recvall(sock, address):
                     progress.update(100)
                     progress.set_description_str((colorama.Style.DIM + ("Получен файл " + info_pb)))
                     return_passcode(sock, address[0], elem1)
+                time.sleep(5)
                 sock.close()
             except ConnectionResetError as e:
                 print(f"Пользователь {str(address[0]) + ":" + str(address[1])} разорвал подключение")
