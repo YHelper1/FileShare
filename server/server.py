@@ -151,7 +151,7 @@ def send_info(passcode, sock: socket.socket):
         sock.sendall(str.encode((" " * 4096)))
     else:
         file = str(result[0])
-        filename = file[file.rfind("/") + 1:] + "<"
+        filename = file[file.rfind('/') + 1:] + "<"
         size = os.path.getsize(file)
         sock.sendall(str.encode(filename + str(size) + (" " * (4096 - len(str.encode(filename + str(size)))))))
         print(f"Информация о файле {file[file.rfind('/') + 1:]} отправлена на {sock.getpeername()[0]}:{sock.getpeername()[1]}")
@@ -166,7 +166,7 @@ def send_f(connection: socket.socket, passcode):
     cur = con.cursor()
     BUFFER_SIZE = 4096
     result = cur.execute(f"select path from path_n_uid where uid = '{passcode}'").fetchone()
-    info_pb = F"файла {result[0][result[0].rfind("/") + 1:]} на {connection.getpeername()[0]}:{connection.getpeername()[1]}"
+    info_pb = F"файла {result[0][result[0].rfind('/') + 1:]} на {connection.getpeername()[0]}:{connection.getpeername()[1]}"
     f_b = read_bar_format = "{l_bar}{bar}"
     progress = tqdm.tqdm(range(100), desc=(colorama.Style.DIM + ("Отправка " + info_pb)), bar_format=f_b,
                          colour="white")
@@ -183,7 +183,7 @@ def send_f(connection: socket.socket, passcode):
                 progress.update(round(now, 0))
                 now -= round(now, 0)
     progress.update(100)
-    progress.set_description_str((colorama.Style.DIM + F"Файл {result[0][result[0].rfind("/") + 1:]} отправлен на {connection.getpeername()[0]}:{connection.getpeername()[1]}"))
+    progress.set_description_str((colorama.Style.DIM + F"Файл {result[0][result[0].rfind('/') + 1:]} отправлен на {connection.getpeername()[0]}:{connection.getpeername()[1]}"))
 
 def except_hook(cls, exception, traceback):
     sys.__excepthook__(cls, exception, traceback)
