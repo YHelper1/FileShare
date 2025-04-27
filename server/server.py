@@ -84,7 +84,7 @@ def recvall(sock, address):
                 f_b = read_bar_format = "{l_bar}{bar}"
 
                 elem1 = os.path.basename(elem1)
-                info_pb = F"{elem1} от {str(address[0]) + ":" + str(address[1])}"
+                info_pb = F"{elem1} от {str(address[0]) }:{ str(address[1])}"
                 progress = tqdm.tqdm(range(100), desc=(colorama.Style.DIM + ("Получение файла " + info_pb)),
                                         bar_format=f_b,
                                         colour="white")
@@ -111,7 +111,7 @@ def recvall(sock, address):
                 return_passcode(sock, address[0], elem1)
             sock.close()
         except ConnectionResetError as e:
-            print(f"Пользователь {str(address[0]) + ":" + str(address[1])} разорвал подключение")
+            print(f"Пользователь {str(address[0]) }:{ str(address[1])} разорвал подключение")
         except ValueError:
             pass
 
