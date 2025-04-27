@@ -154,7 +154,7 @@ def send_info(passcode, sock: socket.socket):
         filename = file[file.rfind("/") + 1:] + "<"
         size = os.path.getsize(file)
         sock.sendall(str.encode(filename + str(size) + (" " * (4096 - len(str.encode(filename + str(size)))))))
-        print(f"Информация о файле {file[file.rfind("/") + 1:]} отправлена на {sock.getpeername()[0]}:{sock.getpeername()[1]}")
+        print(f"Информация о файле {file[file.rfind('/') + 1:]} отправлена на {sock.getpeername()[0]}:{sock.getpeername()[1]}")
 
 
 def send_f(connection: socket.socket, passcode):
