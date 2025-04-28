@@ -111,6 +111,7 @@ def recvall(sock, address):
                 progress.set_description_str((colorama.Style.DIM + ("Получен файл " + info_pb)))
                 print(121212)
                 return_passcode(sock, address[0], elem1)
+                time.sleep(2)
             sock.close()
         except ConnectionResetError as e:
             print(f"Пользователь {str(address[0]) }:{ str(address[1])} разорвал подключение")
