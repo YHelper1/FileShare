@@ -98,7 +98,7 @@ def recvall(sock, address):
 
                 with open(elem1, "wb") as f:
                     while True:
-                        sock.sendall("ok".encode())
+                        sock.send("ok".encode())
                         bytes_read = sock.recv(BUFFER_SIZE)
                         if len(bytes_read) == 0:
                             break
