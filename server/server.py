@@ -135,6 +135,7 @@ def return_passcode(sock: socket.socket, folder, name):
             cur.execute(f"INSERT INTO path_n_uid (uid, path) VALUES ('{uid}', '{name}')")
             con.commit()
             break
+    cur.close()
     sock.sendall(uid.encode())
 
 
