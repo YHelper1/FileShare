@@ -109,7 +109,7 @@ def recvall(sock, address):
                         sock.sendall("ok".encode())
                 progress.update(100)
                 progress.set_description_str((colorama.Style.DIM + ("Получен файл " + info_pb)))
-                sock.sendall("end".encode())
+                print(121212)
                 return_passcode(sock, address[0], elem1)
             sock.close()
         except ConnectionResetError as e:
