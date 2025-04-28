@@ -99,7 +99,6 @@ def recvall(sock, address):
                     while True:
                         bytes_read = sock.recv(BUFFER_SIZE)
                         if len(bytes_read) == 0:
-                            print(bytes_read)
                             break
                         f.write(bytes_read)
                         now += step
