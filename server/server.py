@@ -85,9 +85,9 @@ def recvall(sock, address):
 
                 elem1 = os.path.basename(elem1)
                 info_pb = F"{elem1} от {str(address[0]) }:{ str(address[1])}"
-                #progress = tqdm.tqdm(range(100), desc=(colorama.Style.DIM + ("Получение файла " + info_pb)),
-                                        # bar_format=f_b,
-                                        # colour="white")
+                progress = tqdm.tqdm(range(100), desc=(colorama.Style.DIM + ("Получение файла " + info_pb)),
+                                        bar_format=f_b,
+                                        colour="white")
                 work_dir = os.getcwd()
                 now = 0
                 step = (100 / int(elem2)) * BUFFER_SIZE
@@ -98,15 +98,16 @@ def recvall(sock, address):
                 with open(elem1, "wb") as f:
                     while True:
                         bytes_read = sock.recv(BUFFER_SIZE)
-                        if len(bytes_read) == 0:
+                        if len(bytes_read) < BUFFER_SIZE:
+                            f.write(bytes_read)
                             break
                         f.write(bytes_read)
                         now += step
                         if (now > 1):
-                            #progress.update(round(now, 0))
+                            progress.update(round(now, 0))
                             now -= round(now, 0)
-                #progress.update(100)
-                #progress.set_description_str((colorama.Style.DIM + ("Получен файл " + info_pb)))
+                progress.update(100)
+                progress.set_description_str((colorama.Style.DIM + ("Получен файл " + info_pb)))
                 return_passcode(sock, address[0], elem1)
             sock.close()
         except ConnectionResetError as e:
