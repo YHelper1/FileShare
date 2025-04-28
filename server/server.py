@@ -95,6 +95,7 @@ def recvall(sock, address):
                     os.makedirs(f"{work_dir}/{address[0]}")
 
                 elem1 = f'{work_dir}/{address[0]}/{elem1}'
+                sock.sendall("ok".encode())
                 with open(elem1, "wb") as f:
                     while True:
                         bytes_read = sock.recv(BUFFER_SIZE)
@@ -105,6 +106,7 @@ def recvall(sock, address):
                         if (now > 1):
                             progress.update(round(now, 0))
                             now -= round(now, 0)
+                        sock.sendall("ok".encode())
                 progress.update(100)
                 progress.set_description_str((colorama.Style.DIM + ("Получен файл " + info_pb)))
                 return_passcode(sock, address[0], elem1)
