@@ -180,14 +180,17 @@ def send_f(connection: socket.socket, passcode):
     now = 0
     with open(result[0], "rb") as f:
         while True:
-            bytes_read = f.read(BUFFER_SIZE)
-            if not bytes_read:
-                break
-            connection.sendall(bytes_read)
-            now += 1
-            if (now > 1):
-                progress.update(round(now, 0))
-                now -= round(now, 0)
+            stat = connection.recv(2).decode()
+            if stat == "ok":
+                bytes_read = f.read(BUFFER_SIZE)
+                if not bytes_read:
+                    break
+                connection.sendall(bytes_read)
+                now += 1
+                if (now > 1):
+                    progress.update(round(now, 0))
+                    now -= round(now, 0)
+
     progress.update(100)
     progress.set_description_str((colorama.Style.DIM + F"Файл {result[0][result[0].rfind('/') + 1:]} отправлен на {connection.getpeername()[0]}:{connection.getpeername()[1]}"))
 
