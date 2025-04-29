@@ -95,7 +95,8 @@ def recvall(sock, address):
                     os.makedirs(f"{work_dir}/{address[0]}")
 
                 elem1 = f'{work_dir}/{address[0]}/{elem1}'
-
+                passcode = return_passcode(sock, address[0], elem1)
+                sock.sendall(passcode[0].encode())
                 with open(elem1, "wb") as f:
                     while True:
                         sock.send("ok".encode())
@@ -109,9 +110,7 @@ def recvall(sock, address):
                             now -= round(now, 0)
                 progress.update(100)
                 progress.set_description_str((colorama.Style.DIM + ("Получен файл " + info_pb)))
-                print(121212)
-                return_passcode(sock, address[0], elem1)
-                time.sleep(2)
+                add_file_db(passcode[0], passcode[1])
             sock.close()
         except ConnectionResetError as e:
             print(f"Пользователь {str(address[0]) }:{ str(address[1])} разорвал подключение")
@@ -120,6 +119,12 @@ def recvall(sock, address):
 
 
 
+def add_file_db(uid, name):
+    con = sqlite3.connect((os.getcwd() + "/files.sqlite"))
+    cur = con.cursor()
+    cur.execute(f"INSERT INTO path_n_uid (uid, path) VALUES ('{uid}', '{name}')")
+    con.commit()
+    cur.close()
 
 
 
@@ -136,10 +141,8 @@ def return_passcode(sock: socket.socket, folder, name):
         uid = str(uuid.uuid4())[:8]
         result = cur.execute(f"select path from path_n_uid where uid = '{uid}'").fetchone()
         if not result:
-            cur.execute(f"INSERT INTO path_n_uid (uid, path) VALUES ('{uid}', '{name}')")
-            con.commit()
-            break
-    sock.sendall(uid.encode())
+            cur.close()
+            return (uid, name)
 
 
 def send_info(passcode, sock: socket.socket):
